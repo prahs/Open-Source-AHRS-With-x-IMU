@@ -212,8 +212,8 @@ namespace AHRS
         public void Update(float gx, float gy, float gz, float ax, float ay, float az)
         {
             //一些回归算法中，会给一组系数来作为拟合函数的参数，并根据数据来对其进行训练，以得到最优的拟合函数
-            //感觉这里的q1,2,3,4就是这些系数，并且MadgwickAHRS()中给他们赋了“Quaternion = new float[] { 1f, 0f, 0f, 0f };"的值
-            //像是梯度下降法中给定的初值即f(x)=q1 + q2x + q3y + q4z?
+            //感觉这里的q1,2,3,4是姿态估计中的四元数，通过四元数可以还原出物体的姿态，在工程中常用四元数计算
+            //MadgwickAHRS()中给他们赋了“Quaternion = new float[] { 1f, 0f, 0f, 0f };"的初值，后续再根据算法，对其进行修正
             float q1 = Quaternion[0], q2 = Quaternion[1], q3 = Quaternion[2], q4 = Quaternion[3];   // short name local variable for readability
             float norm;
             float s1, s2, s3, s4;
@@ -245,8 +245,7 @@ namespace AHRS
             az *= norm;
 
             // Gradient decent algorithm corrective step
-            // 梯度下降法？
-            // s1 = 4q1 * q3??
+            // 这里用到了四元数的一些计算
             s1 = _4q1 * q3q3 + _2q3 * ax + _4q1 * q2q2 - _2q2 * ay;
             s2 = _4q2 * q4q4 - _2q4 * ax + 4f * q1q1 * q2 - _2q1 * ay - _4q2 + _8q2 * q2q2 + _8q2 * q3q3 + _4q2 * az;
             s3 = 4f * q1q1 * q3 + _2q1 * ax + _4q3 * q4q4 - _2q4 * ay - _4q3 + _8q3 * q2q2 + _8q3 * q3q3 + _4q3 * az;
